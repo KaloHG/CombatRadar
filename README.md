@@ -4,7 +4,7 @@ Radar that helps you to find mobs and players.
 
 ###Requirements:
 - Java
-- LiteLoader
+- Forge
 
 ####Copyright and  License:
 
