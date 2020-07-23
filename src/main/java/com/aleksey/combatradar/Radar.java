@@ -1,28 +1,24 @@
 package com.aleksey.combatradar;
 
-import static com.mumfrey.liteloader.gl.GL.*;
-
 import com.aleksey.combatradar.config.PlayerType;
 import com.aleksey.combatradar.config.PlayerTypeInfo;
 import com.aleksey.combatradar.config.RadarConfig;
 import com.aleksey.combatradar.entities.*;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
+import net.minecraft.client.network.play.NetworkPlayerInfo;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.init.Items;
+import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.entity.item.ExperienceOrbEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
@@ -41,8 +37,8 @@ public class Radar
         public double posY;
         public double posZ;
 
-        public PlayerInfo(AbstractClientPlayer player) {
-            this.playerName = player.getName();
+        public PlayerInfo(AbstractClientPlayerEntity player) {
+            this.playerName = player.getName().getString();
             this.posX = player.posX;
             this.posY = player.posY;
             this.posZ = player.posZ;
@@ -101,7 +97,7 @@ public class Radar
     }
 
     public void calcSettings(Minecraft minecraft) {
-        ScaledResolution res = new ScaledResolution(minecraft);
+        MainWindow res = minecraft.mainWindow;
         int radarDiameter = (int) ((res.getScaledHeight() - 2) * _config.getRadarSize());
 
         _radarRadius = radarDiameter / 2;
@@ -120,59 +116,59 @@ public class Radar
         if(!_config.getEnabled() || _radarRadius == 0)
             return;
 
-        glPushMatrix();
-        glTranslatef(_radarDisplayX, _radarDisplayY, 0);
-        glRotatef(-minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(_radarDisplayX, _radarDisplayY, 0);
+        GlStateManager.rotatef(-minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
 
         renderCircle(_radarRadius, true);
 
-        glLineWidth(2.0f);
+        GlStateManager.lineWidth(2.0f);
         renderCircle(_radarRadius, false);
-        glLineWidth(1.0f);
+        GlStateManager.lineWidth(1.0f);
 
         renderLines(_radarRadius);
         renderNonPlayerEntities(minecraft);
 
-        glRotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
+        GlStateManager.rotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
         renderTriangle();
 
-        glRotatef(-minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
+        GlStateManager.rotatef(-minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
         renderPlayerEntities(minecraft);
 
-        glPopMatrix();
+        GlStateManager.popMatrix();
     }
 
     private void renderNonPlayerEntities(Minecraft minecraft) {
-        glPushMatrix();
-        glScalef(_radarScale, _radarScale, _radarScale);
+        GlStateManager.pushMatrix();
+        GlStateManager.scalef(_radarScale, _radarScale, _radarScale);
 
         for(RadarEntity radarEntity : _entities) {
             if(!(radarEntity instanceof PlayerRadarEntity))
                 radarEntity.render(minecraft);
         }
 
-        glPopMatrix();
+        GlStateManager.popMatrix();
     }
 
     private void renderPlayerEntities(Minecraft minecraft) {
-        glPushMatrix();
-        glScalef(_radarScale, _radarScale, _radarScale);
+        GlStateManager.pushMatrix();
+        GlStateManager.scalef(_radarScale, _radarScale, _radarScale);
 
         for(RadarEntity radarEntity : _entities) {
             if(radarEntity instanceof PlayerRadarEntity)
                 radarEntity.render(minecraft);
         }
 
-        glPopMatrix();
+        GlStateManager.popMatrix();
     }
 
     private void renderTriangle() {
-        glRotatef(180.0F, 0.0F, 0.0F, 1.0F);
-        glColor4f(1f, 1f, 1f, _config.getRadarOpacity() + 0.5F);
-        glEnableBlend();
-        glDisableTexture2D();
+        GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.color4f(1f, 1f, 1f, _config.getRadarOpacity() + 0.5F);
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -183,16 +179,16 @@ public class Radar
         tessellator.draw();
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
 
-        glEnableTexture2D();
-        glDisableBlend();
-        glRotatef(-180.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.enableTexture();
+        GlStateManager.disableBlend();
+        GlStateManager.rotatef(-180.0F, 0.0F, 0.0F, 1.0F);
     }
 
 
     private void renderLines(float radius) {
-        glLineWidth(2.0f);
-        glDisableTexture2D();
-        glDisableLighting();
+        GlStateManager.lineWidth(2.0f);
+        GlStateManager.disableTexture();
+        GlStateManager.disableLighting();
 
         final float cos45 = 0.7071f;
         float diagonalInner = cos45 * _radarScale;
@@ -200,7 +196,7 @@ public class Radar
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL_LINES, DefaultVertexFormats.POSITION);
+        buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
 
         buffer.pos(0, -radius, 0f).endVertex();
         buffer.pos(0, -_radarScale, 0f).endVertex();
@@ -224,19 +220,19 @@ public class Radar
 
         tessellator.draw();
 
-        glDisableBlend();
-        glEnableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.enableTexture();
     }
 
     private void renderCircle(double radius, boolean fill) {
         float opacity = fill ? _config.getRadarOpacity() : _config.getRadarOpacity() + 0.5f;
-        int bufferType = fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP;
+        int bufferType = fill ? GL11.GL_TRIANGLE_FAN : GL11.GL_LINE_LOOP;
 
-        glEnableBlend();
-        glDisableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glColor4f(_config.getRadarColor().getRed() / 255.0f, _config.getRadarColor().getGreen() / 255.0f, _config.getRadarColor().getBlue() / 255.0f, opacity);
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.color4f(_config.getRadarColor().getRed() / 255.0f, _config.getRadarColor().getGreen() / 255.0f, _config.getRadarColor().getBlue() / 255.0f, opacity);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -249,9 +245,9 @@ public class Radar
         }
         tessellator.draw();
 
-        GL11.glDisable(GL_LINE_SMOOTH);
-        glEnableTexture2D();
-        glDisableBlend();
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+        GlStateManager.enableTexture();
+        GlStateManager.disableBlend();
     }
 
     public int scanEntities(Minecraft minecraft) {
@@ -275,7 +271,7 @@ public class Radar
 
         EntitySettings settings = createEntitySettings();
 
-        List<Entity> entities = minecraft.world.loadedEntityList;
+        Iterable<Entity> entities = minecraft.world.getAllEntities();
 
         for(Entity entity : entities) {
             if(entity == minecraft.player || !_config.isEntityEnabled(entity))
@@ -283,16 +279,16 @@ public class Radar
 
             RadarEntity radarEntity;
 
-            if (entity instanceof EntityXPOrb) {
+            if (entity instanceof ExperienceOrbEntity) {
                 radarEntity = new CustomRadarEntity(entity, settings, "icons/xp_orb.png");
-            } else if (entity instanceof EntityItem) {
+            } else if (entity instanceof ItemEntity) {
                 radarEntity = new ItemRadarEntity(entity, settings);
-            } else if (entity instanceof EntityOtherPlayerMP) {
-                PlayerType playerType = _config.getPlayerType(entity.getName());
+            } else if (entity instanceof RemoteClientPlayerEntity) {
+                PlayerType playerType = _config.getPlayerType(entity.getName().getString());
                 radarEntity = new PlayerRadarEntity(entity, settings, playerType);
 
                 UUID playerKey = entity.getUniqueID();
-                PlayerInfo playerInfo = new PlayerInfo((EntityOtherPlayerMP)entity);
+                PlayerInfo playerInfo = new PlayerInfo((RemoteClientPlayerEntity)entity);
 
                 _radarPlayers.put(playerKey, playerInfo);
 
@@ -309,10 +305,10 @@ public class Radar
                 } else {
                     oldPlayers.remove(playerKey);
                 }
-            } else if (entity instanceof EntityBoat) {
-                radarEntity = new ItemRadarEntity(entity, settings, new ItemStack(Items.BOAT));
-            } else if (entity instanceof EntityMinecart) {
-                radarEntity = new ItemRadarEntity(entity, settings, new ItemStack(Items.MINECART));
+            } else if (entity instanceof BoatEntity) {
+                radarEntity = new ItemRadarEntity(entity, settings, new ItemStack(((BoatEntity) entity).getItemBoat()));
+            } else if (entity instanceof MinecartEntity) {
+                radarEntity = new ItemRadarEntity(entity, settings, ((MinecartEntity) entity).getCartItem());
             } else {
                 radarEntity = new LiveRadarEntity(entity, settings);
             }
@@ -409,7 +405,7 @@ public class Radar
     }
 
     private void sendMessage(Minecraft minecraft, MessageInfo messageInfo) {
-        ITextComponent text = new TextComponentString("[CombatRadar] ").setStyle(new Style().setColor(TextFormatting.DARK_AQUA));
+        ITextComponent text = new StringTextComponent("[CombatRadar] ").setStyle(new Style().setColor(TextFormatting.DARK_AQUA));
 
         TextFormatting playerColor;
         PlayerType playerType = _config.getPlayerType(messageInfo.playerName);
@@ -426,7 +422,7 @@ public class Radar
                 break;
         }
 
-        text = text.appendSibling(new TextComponentString(messageInfo.playerName).setStyle(new Style().setColor(playerColor)));
+        text = text.appendSibling(new StringTextComponent(messageInfo.playerName).setStyle(new Style().setColor(playerColor)));
 
         String actionText;
         TextFormatting actionColor;
@@ -452,7 +448,7 @@ public class Radar
                 return;
         }
 
-        text = text.appendSibling(new TextComponentString(actionText).setStyle(new Style().setColor(actionColor)));
+        text = text.appendSibling(new StringTextComponent(actionText).setStyle(new Style().setColor(actionColor)));
 
         if(messageInfo.playerInfo != null) {
             ITextComponent coordText;
@@ -462,11 +458,11 @@ public class Radar
             } else if(_config.getIsVoxelMapEnabled()) {
                 coordText = getVoxelMapCoord(messageInfo.playerInfo);
             } else {
-                coordText = new TextComponentString(getChatCoordText(messageInfo.playerInfo, false, true)).setStyle(new Style().setColor(actionColor));
+                coordText = new StringTextComponent(getChatCoordText(messageInfo.playerInfo, false, true)).setStyle(new Style().setColor(actionColor));
             }
 
             text = text
-                    .appendSibling(new TextComponentString(" at ").setStyle(new Style().setColor(actionColor)))
+                    .appendSibling(new StringTextComponent(" at ").setStyle(new Style().setColor(actionColor)))
                     .appendSibling(coordText);
         }
 
@@ -474,8 +470,8 @@ public class Radar
     }
 
     private static ITextComponent getJourneyMapCoord(PlayerInfo playerInfo) {
-        ITextComponent hover = new TextComponentString("JourneyMap: ").setStyle(new Style().setColor(TextFormatting.YELLOW));
-        hover = hover.appendSibling(new TextComponentString("Click to create Waypoint.\nCtrl+Click to view on map.").setStyle(new Style().setColor(TextFormatting.AQUA)));
+        ITextComponent hover = new StringTextComponent("JourneyMap: ").setStyle(new Style().setColor(TextFormatting.YELLOW));
+        hover = hover.appendSibling(new StringTextComponent("Click to create Waypoint.\nCtrl+Click to view on map.").setStyle(new Style().setColor(TextFormatting.AQUA)));
 
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/jm wpedit " + getChatCoordText(playerInfo, true, true));
@@ -485,11 +481,11 @@ public class Radar
                 .setHoverEvent(hoverEvent)
                 .setColor(TextFormatting.AQUA);
 
-        return new TextComponentString(getChatCoordText(playerInfo, false, true)).setStyle(coordStyle);
+        return new StringTextComponent(getChatCoordText(playerInfo, false, true)).setStyle(coordStyle);
     }
 
     private static ITextComponent getVoxelMapCoord(PlayerInfo playerInfo) {
-        ITextComponent hover = new TextComponentString("Click to highlight coordinate,\nor control-click to add/edit waypoint.")
+        ITextComponent hover = new StringTextComponent("Click to highlight coordinate,\nor control-click to add/edit waypoint.")
                 .setStyle(new Style().setColor(TextFormatting.WHITE));
 
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover);
@@ -500,7 +496,7 @@ public class Radar
                 .setHoverEvent(hoverEvent)
                 .setColor(TextFormatting.AQUA);
 
-        return new TextComponentString(getChatCoordText(playerInfo, false, true)).setStyle(coordStyle);
+        return new StringTextComponent(getChatCoordText(playerInfo, false, true)).setStyle(coordStyle);
     }
 
     private static String getChatCoordText(PlayerInfo playerInfo, boolean includeName, boolean includeBrackets) {

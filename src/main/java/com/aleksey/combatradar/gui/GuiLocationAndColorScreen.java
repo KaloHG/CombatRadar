@@ -1,25 +1,21 @@
 package com.aleksey.combatradar.gui;
 
 import com.aleksey.combatradar.config.RadarConfig;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.ScaledResolution;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.client.MainWindow;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.text.StringTextComponent;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 
 /**
  * @author Aleksey Terzi
  */
-public class GuiLocationAndColorScreen extends GuiScreen {
-    private static final int BUTTON_ID_TOPLEFT = 1;
-    private static final int BUTTON_ID_TOPRIGHT = 2;
-    private static final int BUTTON_ID_BOTTOMLEFT = 3;
-    private static final int BUTTON_ID_BOTTOMRIGHT = 4;
-    private static final int BUTTON_ID_DONE = 5;
-
+public class GuiLocationAndColorScreen extends Screen {
     private RadarConfig _config;
-    private GuiScreen _parent;
+    private Screen _parent;
     private GuiSlider _redSlider;
     private GuiSlider _greenSlider;
     private GuiSlider _blueSlider;
@@ -29,99 +25,79 @@ public class GuiLocationAndColorScreen extends GuiScreen {
     private GuiSlider _iconScaleSlider;
     private GuiSlider _fontScaleSlider;
 
-    public GuiLocationAndColorScreen(GuiScreen parent, RadarConfig config) {
+    public GuiLocationAndColorScreen(Screen parent, RadarConfig config) {
+        super(new StringTextComponent("Location and Color"));
         _parent = parent;
         _config = config;
     }
 
     @Override
-    public void initGui() {
-        Keyboard.enableRepeatEvents(true);
-
-        this.buttonList.clear();
+    public void init() {
+        this.buttons.clear();
+        this.children.clear();
 
         int y = this.height / 4 - 16;
         int x = this.width / 2 - 100;
 
-        this.buttonList.add(_redSlider = new GuiSlider(0, x, y, 66, 1, 0, "Red", _config.getRadarColor().getRed() / 255f, false));
-        this.buttonList.add(_greenSlider = new GuiSlider(0, x + 66 + 1, y, 66, 1, 0, "Green", _config.getRadarColor().getGreen() / 255f, false));
-        this.buttonList.add(_blueSlider = new GuiSlider(0, x + 66 + 1 + 66 + 1, y, 66, 1, 0, "Blue", _config.getRadarColor().getBlue() / 255f, false));
+        addButton(_redSlider = new GuiSlider(x, y, 66, 1, 0, "Red", _config.getRadarColor().getRed() / 255f, false));
+        addButton(_greenSlider = new GuiSlider(x + 66 + 1, y, 66, 1, 0, "Green", _config.getRadarColor().getGreen() / 255f, false));
+        addButton(_blueSlider = new GuiSlider(x + 66 + 1 + 66 + 1, y, 66, 1, 0, "Blue", _config.getRadarColor().getBlue() / 255f, false));
         y += 24;
-        this.buttonList.add(_opacitySlider = new GuiSlider(0, x, y, 200, 1, 0, "Radar Opacity", _config.getRadarOpacity(), false));
+        addButton(_opacitySlider = new GuiSlider(x, y, 200, 1, 0, "Radar Opacity", _config.getRadarOpacity(), false));
         y += 24;
-        this.buttonList.add(_sizeSlider = new GuiSlider(0, x, y, 100, 1, 0.1f, "Radar Size", _config.getRadarSize(), false));
-        this.buttonList.add(_rangeSlider = new GuiSlider(0, x + 101, y, 100, 8, 3, "Radar Range", _config.getRadarDistance() / 16f, true));
+        addButton(_sizeSlider = new GuiSlider(x, y, 100, 1, 0.1f, "Radar Size", _config.getRadarSize(), false));
+        addButton(_rangeSlider = new GuiSlider(x + 101, y, 100, 8, 3, "Radar Range", _config.getRadarDistance() / 16f, true));
         y += 24;
-        this.buttonList.add(_iconScaleSlider = new GuiSlider(0, x, y, 100, 1f, 0.1f, "Icon Size", _config.getIconScale() / 3f, false));
-        this.buttonList.add(_fontScaleSlider = new GuiSlider(0, x + 101, y, 100, 1f, 0.2f, "Font Size", _config.getFontScale() / 3f, false));
+        addButton(_iconScaleSlider = new GuiSlider(x, y, 100, 1f, 0.1f, "Icon Size", _config.getIconScale() / 3f, false));
+        addButton(_fontScaleSlider = new GuiSlider(x + 101, y, 100, 1f, 0.2f, "Font Size", _config.getFontScale() / 3f, false));
         y += 24 + 24;
-        this.buttonList.add(new GuiButton(BUTTON_ID_TOPLEFT, x, y, 100, 20, "Snap top left"));
-        this.buttonList.add(new GuiButton(BUTTON_ID_TOPRIGHT, x + 101, y, 100, 20, "Snap top right"));
+        addButton(new Button(x, y, 100, 20, "Snap top left", b -> {
+            _config.setRadarX(0);
+            _config.setRadarY(0);
+            _config.save();
+        }));
+        addButton(new Button(x + 101, y, 100, 20, "Snap top right", b -> {
+            _config.setRadarX(1);
+            _config.setRadarY(0);
+            _config.save();
+        }));
         y += 24;
-        this.buttonList.add(new GuiButton(BUTTON_ID_BOTTOMLEFT, x, y, 100, 20, "Snap bottom left"));
-        this.buttonList.add(new GuiButton(BUTTON_ID_BOTTOMRIGHT, x + 101, y, 100, 20, "Snap bottom right"));
+        addButton(new Button(x, y, 100, 20, "Snap bottom left", b -> {
+            _config.setRadarX(0);
+            _config.setRadarY(1);
+            _config.save();
+        }));
+        addButton(new Button(x + 101, y, 100, 20, "Snap bottom right", b -> {
+            _config.setRadarX(1);
+            _config.setRadarY(1);
+            _config.save();
+        }));
         y += 24;
-        this.buttonList.add(new GuiButton(BUTTON_ID_DONE, x, y, 200, 20, "Done"));
+        addButton(new Button(x, y, 200, 20, "Done", b -> minecraft.displayGuiScreen(_parent)));
     }
 
     @Override
-    public void onGuiClosed() {
-        Keyboard.enableRepeatEvents(false);
-    }
-
-    @Override
-    public void actionPerformed(GuiButton guiButton) {
-        if(!guiButton.enabled)
-            return;
-
-        switch(guiButton.id) {
-            case BUTTON_ID_TOPLEFT:
-                _config.setRadarX(0);
-                _config.setRadarY(0);
-                _config.save();
-                break;
-            case BUTTON_ID_TOPRIGHT:
-                _config.setRadarX(1);
-                _config.setRadarY(0);
-                _config.save();
-                break;
-            case BUTTON_ID_BOTTOMLEFT:
-                _config.setRadarX(0);
-                _config.setRadarY(1);
-                _config.save();
-                break;
-            case BUTTON_ID_BOTTOMRIGHT:
-                _config.setRadarX(1);
-                _config.setRadarY(1);
-                _config.save();
-                break;
-            case BUTTON_ID_DONE:
-                mc.displayGuiScreen(_parent);
-                break;
-        }
-    }
-
-    @Override
-    public void updateScreen() {
+    public void tick() {
         boolean isChanged = false;
 
-        ScaledResolution res = new ScaledResolution(mc);
+        MainWindow res = minecraft.mainWindow;
         float xSpeed = 1.f / res.getScaledWidth();
         float ySpeed = 1.f / res.getScaledHeight();
+        long handle = minecraft.mainWindow.getHandle();
 
-        if(Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+        if(InputMappings.isKeyDown(handle, GLFW.GLFW_KEY_LEFT)) {
             _config.setRadarX(_config.getRadarX() - xSpeed);
             isChanged = true;
         }
-        if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+        if(InputMappings.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT)) {
             _config.setRadarX(_config.getRadarX() + xSpeed);
             isChanged = true;
         }
-        if(Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+        if(InputMappings.isKeyDown(handle, GLFW.GLFW_KEY_UP)) {
             _config.setRadarY(_config.getRadarY() - ySpeed);
             isChanged = true;
         }
-        if(Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+        if(InputMappings.isKeyDown(handle, GLFW.GLFW_KEY_DOWN)) {
             _config.setRadarY(_config.getRadarY() + ySpeed);
             isChanged = true;
         }
@@ -140,10 +116,15 @@ public class GuiLocationAndColorScreen extends GuiScreen {
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        drawDefaultBackground();
-        drawCenteredString(this.fontRenderer, "Location and Color", this.width / 2, this.height / 4 - 40, Color.WHITE.getRGB());
-        drawCenteredString(this.fontRenderer, "Use arrow keys to reposition radar", this.width / 2, _iconScaleSlider.y + 24 + 12, Color.WHITE.getRGB());
-        super.drawScreen(mouseX, mouseY, partialTicks);
+    public void onClose() {
+        minecraft.displayGuiScreen(_parent);
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        renderBackground();
+        drawCenteredString(this.font, "Location and Color", this.width / 2, this.height / 4 - 40, Color.WHITE.getRGB());
+        drawCenteredString(this.font, "Use arrow keys to reposition radar", this.width / 2, _iconScaleSlider.y + 24 + 12, Color.WHITE.getRGB());
+        super.render(mouseX, mouseY, partialTicks);
     }
 }

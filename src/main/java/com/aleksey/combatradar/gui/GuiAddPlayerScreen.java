@@ -2,78 +2,56 @@ package com.aleksey.combatradar.gui;
 
 import com.aleksey.combatradar.config.PlayerType;
 import com.aleksey.combatradar.config.RadarConfig;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.StringTextComponent;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * @author Aleksey Terzi
  */
-public class GuiAddPlayerScreen extends GuiScreen {
-    private static final int BUTTON_ID_ADD = 0;
-    private static final int BUTTON_ID_CANCEL = 1;
-
+public class GuiAddPlayerScreen extends Screen {
     private RadarConfig _config;
-    private GuiScreen _parent;
+    private Screen _parent;
     private PlayerType _playerType;
-    private GuiTextField _playerNameTextField;
+    private TextFieldWidget _playerNameTextField;
 
-    public GuiAddPlayerScreen(GuiScreen parent, RadarConfig config, PlayerType playerType) {
+    public GuiAddPlayerScreen(Screen parent, RadarConfig config, PlayerType playerType) {
+        super(new StringTextComponent("Add Player"));
         _parent = parent;
         _config = config;
         _playerType = playerType;
     }
 
     @Override
-    public void initGui() {
-        this.buttonList.clear();
+    public void init() {
+        this.buttons.clear();
+        this.children.clear();
 
         int y = this.height / 3;
         int x = this.width / 2 - 100;
 
-        _playerNameTextField = new GuiTextField(101, fontRenderer, x, y, 200, 20);
+        addButton(_playerNameTextField = new TextFieldWidget(font, x, y, 200, 20, ""));
         y += 24;
-        this.buttonList.add(new GuiButton(BUTTON_ID_ADD, x, y, 200, 20, "Add"));
+        addButton(new Button(x, y, 200, 20, "Add", b -> actionAdd()));
         y += 24;
-        this.buttonList.add(new GuiButton(BUTTON_ID_CANCEL, x, y, 200, 20, "Cancel"));
+        addButton(new Button(x, y, 200, 20, "Cancel", b -> actionCancel()));
 
-        _playerNameTextField.setFocused(true);
+        setFocused(_playerNameTextField);
+        _playerNameTextField.setFocused2(true);
     }
 
     @Override
-    public void mouseClicked(int x, int y, int mouseButton) throws IOException {
-        super.mouseClicked(x, y, mouseButton);
-        _playerNameTextField.mouseClicked(x, y, mouseButton);
-    }
-
-    @Override
-    public void actionPerformed(GuiButton guiButton) {
-        if(!guiButton.enabled)
-            return;
-
-        switch(guiButton.id) {
-            case BUTTON_ID_ADD:
-                actionAdd();
-                break;
-            case BUTTON_ID_CANCEL:
-                actionCancel();
-                break;
-        }
-    }
-
-    @Override
-    public void keyTyped(char keyChar, int keyCode) {
-        if(_playerNameTextField.isFocused())
-            _playerNameTextField.textboxKeyTyped(keyChar, keyCode);
-
-        if(keyCode == Keyboard.KEY_RETURN)
+    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
+        if(p_keyPressed_1_ == GLFW.GLFW_KEY_ENTER)
             actionAdd();
-        else if(keyCode == Keyboard.KEY_ESCAPE)
+        else if(p_keyPressed_1_ == GLFW.GLFW_KEY_ESCAPE)
             actionCancel();
+
+        return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
     }
 
     private void actionAdd() {
@@ -85,24 +63,27 @@ public class GuiAddPlayerScreen extends GuiScreen {
         _config.setPlayerType(playerName, _playerType);
         _config.save();
 
-        mc.displayGuiScreen(_parent);
+        minecraft.displayGuiScreen(_parent);
     }
 
     private void actionCancel() {
-        mc.displayGuiScreen(_parent);
+        minecraft.displayGuiScreen(_parent);
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    public void onClose() {
+        minecraft.displayGuiScreen(_parent);
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float partialTicks) {
         String playerTypeName = _playerType == PlayerType.Ally ? "Ally" : "Enemy";
 
-        drawBackground(0);
-        drawCenteredString(this.fontRenderer, "Add " + playerTypeName + " Player", this.width / 2, this.height / 4 - 40, Color.WHITE.getRGB());
+        renderDirtBackground(0);
+        drawCenteredString(this.font, "Add " + playerTypeName + " Player", this.width / 2, this.height / 4 - 40, Color.WHITE.getRGB());
 
-        fontRenderer.drawStringWithShadow("Player username", this.width / 2 - 100, _playerNameTextField.y - 12, Color.LIGHT_GRAY.getRGB());
+        font.drawStringWithShadow("Player username", this.width / 2 - 100, _playerNameTextField.y - 12, Color.LIGHT_GRAY.getRGB());
 
-        _playerNameTextField.drawTextBox();
-
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
     }
 }

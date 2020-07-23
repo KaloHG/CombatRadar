@@ -1,16 +1,12 @@
 package com.aleksey.combatradar.entities;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.entity.*;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.horse.HorseEntity;
 import net.minecraft.util.ResourceLocation;
-
-import static com.mumfrey.liteloader.gl.GL.*;
 
 /**
  * @author Aleksey Terzi
@@ -34,42 +30,42 @@ public class LiveRadarEntity extends RadarEntity {
         float iconScale = getSettings().iconScale;
 
         minecraft.getTextureManager().bindTexture(resourceLocation);
-        glColor4f(1.0F, 1.0F, 1.0F, getSettings().iconOpacity);
-        glEnableBlend();
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, getSettings().iconOpacity);
+        GlStateManager.enableBlend();
 
-        glPushMatrix();
-        glTranslatef(displayX, displayY, 0);
-        glRotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
-        glScalef(iconScale, iconScale, iconScale);
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(displayX, displayY, 0);
+        GlStateManager.rotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
+        GlStateManager.scalef(iconScale, iconScale, iconScale);
 
-        Gui.drawModalRectWithCustomSizedTexture(-8, -8, 0, 0, 16, 16, 16, 16);
+        AbstractGui.blit(-8, -8, 0, 0, 16, 16, 16, 16);
 
-        glPopMatrix();
-        glDisableBlend();
+        GlStateManager.popMatrix();
+        GlStateManager.disableBlend();
     }
 
     private ResourceLocation getResourceLocation(Minecraft minecraft) {
         if(_resourceLocation == null) {
             try {
-                RenderManager renderManager = minecraft.getRenderManager();
-                Render render = renderManager.getEntityRenderObject(getEntity());
+                EntityRendererManager renderManager = minecraft.getRenderManager();
+                EntityRenderer render = renderManager.getRenderer(getEntity());
 
-                if (render instanceof RenderHorse) {
-                    EntityHorse horseEntity = (EntityHorse) getEntity();
+                if (render instanceof HorseRenderer) {
+                    HorseEntity horseEntity = (HorseEntity) getEntity();
                     int horseVariant = (0xff & horseEntity.getHorseVariant()) % 7;
 
                     _resourceLocation = new ResourceLocation("combatradar", "icons/horse/horse_" + HORSE_VARIANTS[horseVariant] + ".png");
-                } else if (render instanceof RenderLlama) {
+                } else if (render instanceof LlamaRenderer) {
                     _resourceLocation = new ResourceLocation("combatradar", "icons/llama/llama.png");
-                } else if (render instanceof RenderParrot) {
+                } else if (render instanceof ParrotRenderer) {
                     _resourceLocation = new ResourceLocation("combatradar", "icons/parrot/parrot.png");
-                } else if (render instanceof RenderShulker) {
+                } else if (render instanceof ShulkerRenderer) {
                     _resourceLocation = new ResourceLocation("combatradar", "icons/shulker/shulker.png");
-                } else if (render instanceof RenderGhast) {
+                } else if (render instanceof GhastRenderer) {
                     _resourceLocation = new ResourceLocation("combatradar", "icons/ghast/ghast.png");
                 } else {
                     ResourceLocation original = ResourceHelper.getEntityTexture(render, getEntity());
-                    _resourceLocation = new ResourceLocation("combatradar", original.getResourcePath().replace("textures/entity/", "icons/"));
+                    _resourceLocation = new ResourceLocation("combatradar", original.getPath().replace("textures/entity/", "icons/"));
                 }
             } catch (Throwable e) {
                 System.out.println("Can't get entityTexture for " + getEntity().getName());

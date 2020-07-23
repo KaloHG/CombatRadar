@@ -1,0 +1,10 @@
+modLoader="javafml"
+loaderVersion="[28,)"
+
+[[mods]]
+modId="combatradar"
+version="${version}"
+displayName="CombatRadar"
+credits="Aleksey Terzi"
+authors="Aleksey Terzi, Virizion"
+description='''A continuation of CombatRadar, originally developed by Aleksey Terzi. Updated to work with 1.14.4.'''

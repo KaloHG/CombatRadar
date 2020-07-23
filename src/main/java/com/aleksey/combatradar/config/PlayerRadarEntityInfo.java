@@ -1,6 +1,6 @@
 package com.aleksey.combatradar.config;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 
 /**
  * @author Aleksey Terzi
@@ -13,7 +13,7 @@ public class PlayerRadarEntityInfo extends RadarEntityInfo {
     }
 
     public PlayerRadarEntityInfo(PlayerType playerType, String name, String iconPath, GroupType groupType) {
-        super(EntityPlayer.class, name, iconPath, groupType);
+        super(PlayerEntity.class, name, iconPath, groupType);
         _playerType = playerType;
     }
 }

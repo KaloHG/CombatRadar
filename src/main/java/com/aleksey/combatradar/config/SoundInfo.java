@@ -25,6 +25,12 @@ public class SoundInfo {
             new SoundInfo("Xylophone", "xylophone"),
             new SoundInfo("Harp", "harp"),
             new SoundInfo("Pling", "pling"),
+            //1.14+
+            new SoundInfo("Iron Xylophone", "iron_xylophone"),
+            new SoundInfo("Cow Bell", "cow_bell"),
+            new SoundInfo("Didgeridoo", "didgeridoo"),
+            new SoundInfo("Bit", "bit"),
+            new SoundInfo("Banjo", "banjo")
     };
 
     public static SoundInfo getByValue(String value) {

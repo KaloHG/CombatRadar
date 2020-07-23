@@ -10,7 +10,7 @@ public class ResourceHelper {
     /**
      * gives us access to the protected getEntityTexture method
      */
-    public static ResourceLocation getEntityTexture(Render r, Entity e) {
+    public static ResourceLocation getEntityTexture(EntityRenderer r, Entity e) {
         return r.getEntityTexture(e);
     }
 }

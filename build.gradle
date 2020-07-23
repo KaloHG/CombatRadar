@@ -1,61 +1,40 @@
 buildscript {
     repositories {
-        mavenLocal()
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
         mavenCentral()
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = 'sponge'
-            url = 'http://repo.spongepowered.org/maven'
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:' + project.forgeGradleVersion
-        classpath 'org.spongepowered:mixingradle:0.5-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
-apply plugin: 'net.minecraftforge.gradle.liteloader'
-apply plugin: 'org.spongepowered.mixin'
+group = "com.aleksey"
+version = "1.2"
+archivesBaseName = 'combatradar'
 
-group = "com.aleksey.combatradar" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "combatradar"
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    // these values are defined in the gradle.properties file, so that this file does not need to be altered
-    version = project.mcVersion
-    mappings = project.mcMappings
-    runDir = "run"
+    mappings channel: 'snapshot', version: '20190719-1.14.3'
 }
 
-sourceSets {
-    main {
-        // Refmap declaration must match the refmap name specified in the json config
-        ext.refMap = "mixins.combatradar.refmap.json"
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.14.4-28.2.3'
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'META-INF/mods.toml'
+        expand 'version':project.version
     }
-}
 
-mixin {
-    // liteloader does not do runtime deobfuscation, so in production we use "notch names", mixin needs to know this
-    defaultObfuscationEnv notch
-}
-
-litemod {
-    json {
-        name = "Combat Radar"
-        mcversion = project.targetVersion
-        description = "Combat Radar" 
-        mixinConfigs += "mixins.combatradar.json"
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'META-INF/mods.toml'
     }
-}
-
-jar {
-    // The litemod task above generates the litemod.json dynamically, you can replace it with a resource if you want more control
-    from litemod.outputs
 }

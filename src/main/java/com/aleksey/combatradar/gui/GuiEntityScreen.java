@@ -3,9 +3,11 @@ package com.aleksey.combatradar.gui;
 import com.aleksey.combatradar.config.GroupType;
 import com.aleksey.combatradar.config.RadarConfig;
 import com.aleksey.combatradar.config.RadarEntityInfo;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -13,12 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.mumfrey.liteloader.gl.GL.*;
-
 /**
  * @author Aleksey Terzi
  */
-public class GuiEntityScreen extends GuiScreen {
+public class GuiEntityScreen extends Screen {
     private static class EntityGroup {
         public GroupType groupType;
         public List<RadarEntityInfo> entities;
@@ -48,13 +48,6 @@ public class GuiEntityScreen extends GuiScreen {
         }
     }
 
-    private static final int BUTTON_ID_NEUTRAL = 1;
-    private static final int BUTTON_ID_AGGRESSIVE = 2;
-    private static final int BUTTON_ID_OTHER = 3;
-    private static final int BUTTON_ID_ENABLE = 4;
-    private static final int BUTTON_ID_DONE = 5;
-    private static final int BUTTON_ID_FIRSTICON = 100;
-
     private static final int MAX_ENTITIES_PER_COL = 8;
     private static final int ICON_WIDTH = 12;
     private static final int LINE_HEIGHT = 16;
@@ -63,8 +56,8 @@ public class GuiEntityScreen extends GuiScreen {
     private static GroupType _activeGroupType = GroupType.Neutral;
 
     private RadarConfig _config;
-    private GuiScreen _parent;
-    private GuiButton _enableButton;
+    private Screen _parent;
+    private Button _enableButton;
 
     private Map<GroupType, EntityGroup> _groups;
     private int _titleTop;
@@ -73,13 +66,14 @@ public class GuiEntityScreen extends GuiScreen {
     private EntityGroup _activeGroup;
     private String _groupName;
 
-    public GuiEntityScreen(GuiScreen parent, RadarConfig config) {
+    public GuiEntityScreen(Screen parent, RadarConfig config) {
+        super(new StringTextComponent("Entity"));
         _parent = parent;
         _config = config;
     }
 
     @Override
-    public void initGui() {
+    public void init() {
         _titleTop = this.height / 4 - 40;
         _buttonTop = this.height - this.height / 4 - 10;
         _iconTop = _titleTop + 16 + (this.height - (this.height - _buttonTop) - _titleTop - 16 - MAX_ENTITIES_PER_COL * LINE_HEIGHT) / 2;
@@ -98,7 +92,7 @@ public class GuiEntityScreen extends GuiScreen {
                 _groups.put(info.getGroupType(), group = new EntityGroup(info.getGroupType()));
 
             int colIndex = group.entities.size() / MAX_ENTITIES_PER_COL;
-            int textWidth = this.fontRenderer.getStringWidth(info.getName());
+            int textWidth = this.font.getStringWidth(info.getName());
 
             if(group.listColTextWidth.size() <= colIndex)
                 group.listColTextWidth.add(textWidth);
@@ -114,36 +108,41 @@ public class GuiEntityScreen extends GuiScreen {
         _activeGroup = _groups.get(groupType);
         _iconLeft = (this.width - _activeGroup.getTotalWidth() + 25) / 2;
 
-        this.buttonList.clear();
+        this.buttons.clear();
+        this.children.clear();
 
         int y = _buttonTop;
         int x = this.width / 2 - 100;
 
-        GuiButton neutralButton, aggressiveButton, otherButton;
+        Button neutralButton, aggressiveButton, otherButton;
 
-        this.buttonList.add(neutralButton = new GuiButton(BUTTON_ID_NEUTRAL, x, y, 66, 20, "Neutral"));
-        this.buttonList.add(aggressiveButton = new GuiButton(BUTTON_ID_AGGRESSIVE, x + 66 + 1, y, 66, 20, "Agressive"));
-        this.buttonList.add(otherButton = new GuiButton(BUTTON_ID_OTHER, x + 66 + 1 + 66 + 1, y, 66, 20, "Other"));
+        addButton(neutralButton = new Button(x, y, 66, 20, "Neutral", b -> showGroup(GroupType.Neutral)));
+        addButton(aggressiveButton = new Button(x + 66 + 1, y, 66, 20, "Agressive", b -> showGroup(GroupType.Aggressive)));
+        addButton(otherButton = new Button(x + 66 + 1 + 66 + 1, y, 66, 20, "Other", b -> showGroup(GroupType.Other)));
 
         switch(groupType) {
             case Neutral:
-                neutralButton.enabled = false;
+                neutralButton.active = false;
                 _groupName = "Neutral";
                 break;
             case Aggressive:
-                aggressiveButton.enabled = false;
+                aggressiveButton.active = false;
                 _groupName = "Aggressive";
                 break;
             case Other:
-                otherButton.enabled = false;
+                otherButton.active = false;
                 _groupName = "Other";
                 break;
         }
 
         y += 24;
-        this.buttonList.add(_enableButton = new GuiButton(BUTTON_ID_ENABLE, x, y, 200, 20, getEnableButtonText()));
+        addButton(_enableButton = new Button(x, y, 200, 20, getEnableButtonText(), b -> {
+            _config.setGroupEnabled(_activeGroupType, !_config.isGroupEnabled(_activeGroupType));
+            _config.save();
+            _enableButton.setMessage(getEnableButtonText());
+        }));
         y += 24;
-        this.buttonList.add(new GuiButton(BUTTON_ID_DONE, x, y, 200, 20, "Done"));
+        addButton(new Button(x, y, 200, 20, "Done", b -> minecraft.displayGuiScreen(_parent)));
 
         addIconButtons();
     }
@@ -172,7 +171,13 @@ public class GuiEntityScreen extends GuiScreen {
             }
 
             String buttonText = info.getEnabled() ? "on": "off";
-            this.buttonList.add(new GuiButton(BUTTON_ID_FIRSTICON + info.getId(), buttonX, buttonY, BUTTON_WIDTH, buttonHeight, buttonText));
+            final RadarEntityInfo infoFinal = info;
+
+            addButton(new Button(buttonX, buttonY, BUTTON_WIDTH, buttonHeight, buttonText, b -> {
+                infoFinal.setEnabled(!infoFinal.getEnabled());
+                _config.save();
+                b.setMessage(info.getEnabled() ? "on": "off");
+            }));
 
             buttonY += LINE_HEIGHT;
 
@@ -181,48 +186,17 @@ public class GuiEntityScreen extends GuiScreen {
     }
 
     @Override
-    public void onGuiClosed() {
+    public void onClose() {
         _config.save();
+        minecraft.displayGuiScreen(_parent);
     }
 
     @Override
-    public void actionPerformed(GuiButton guiButton) {
-        if(!guiButton.enabled)
-            return;
-
-        switch(guiButton.id) {
-            case BUTTON_ID_NEUTRAL:
-                showGroup(GroupType.Neutral);
-                break;
-            case BUTTON_ID_AGGRESSIVE:
-                showGroup(GroupType.Aggressive);
-                break;
-            case BUTTON_ID_OTHER:
-                showGroup(GroupType.Other);
-                break;
-            case BUTTON_ID_ENABLE:
-                _config.setGroupEnabled(_activeGroupType, !_config.isGroupEnabled(_activeGroupType));
-                _config.save();
-                _enableButton.displayString = getEnableButtonText();
-                break;
-            case BUTTON_ID_DONE:
-                mc.displayGuiScreen(_parent);
-                break;
-            default:
-                RadarEntityInfo info = _config.getEntities().get(guiButton.id - BUTTON_ID_FIRSTICON);
-                info.setEnabled(!info.getEnabled());
-                _config.save();
-                guiButton.displayString = info.getEnabled() ? "on": "off";
-                break;
-        }
-    }
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        drawBackground(0);
-        drawCenteredString(this.fontRenderer, "Radar Entities", this.width / 2, _titleTop, Color.WHITE.getRGB());
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        renderDirtBackground(0);
+        drawCenteredString(this.font, "Radar Entities", this.width / 2, _titleTop, Color.WHITE.getRGB());
         renderIcons();
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
     }
 
     private void renderIcons() {
@@ -243,7 +217,7 @@ public class GuiEntityScreen extends GuiScreen {
             renderIcon(x, y + 4, info);
 
             Color color = info.getEnabled() ? Color.WHITE : Color.DARK_GRAY;
-            this.fontRenderer.drawStringWithShadow(info.getName(), x + ICON_WIDTH, y, color.getRGB());
+            this.font.drawStringWithShadow(info.getName(), x + ICON_WIDTH, y, color.getRGB());
 
             y += LINE_HEIGHT;
 
@@ -252,15 +226,15 @@ public class GuiEntityScreen extends GuiScreen {
     }
 
     private void renderIcon(float x, float y, RadarEntityInfo info) {
-        glPushMatrix();
-        glTranslatef(x, y, 0);
-        glScalef(0.6f, 0.6f, 0.6f);
-        glColor4f(1f, 1f, 1f, 1f);
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(x, y, 0);
+        GlStateManager.scalef(0.6f, 0.6f, 0.6f);
+        GlStateManager.color4f(1f, 1f, 1f, 1f);
 
-        mc.getTextureManager().bindTexture(info.getIcon());
+        minecraft.getTextureManager().bindTexture(info.getIcon());
 
-        Gui.drawModalRectWithCustomSizedTexture(-8, -8, 0, 0, 16, 16, 16, 16);
+        AbstractGui.blit(-8, -8, 0, 0, 16, 16, 16, 16);
 
-        glPopMatrix();
+        GlStateManager.popMatrix();
     }
 }

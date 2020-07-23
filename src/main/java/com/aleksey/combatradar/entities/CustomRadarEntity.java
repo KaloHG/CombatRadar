@@ -1,12 +1,10 @@
 package com.aleksey.combatradar.entities;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-
-import static com.mumfrey.liteloader.gl.GL.*;
-import static com.mumfrey.liteloader.gl.GL.glDisableBlend;
 
 /**
  * @author Aleksey Terzi
@@ -25,17 +23,17 @@ public class CustomRadarEntity extends RadarEntity {
         float iconScale = getSettings().iconScale;
 
         minecraft.getTextureManager().bindTexture(_resourceLocation);
-        glColor4f(1.0F, 1.0F, 1.0F, getSettings().iconOpacity);
-        glEnableBlend();
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, getSettings().iconOpacity);
+        GlStateManager.enableBlend();
 
-        glPushMatrix();
-        glTranslatef(displayX, displayY, 0);
-        glRotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
-        glScalef(iconScale, iconScale, iconScale);
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(displayX, displayY, 0);
+        GlStateManager.rotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
+        GlStateManager.scalef(iconScale, iconScale, iconScale);
 
-        Gui.drawModalRectWithCustomSizedTexture(-8, -8, 0, 0, 16, 16, 16, 16);
+        AbstractGui.blit(-8, -8, 0, 0, 16, 16, 16, 16);
 
-        glPopMatrix();
-        glDisableBlend();
+        GlStateManager.popMatrix();
+        GlStateManager.disableBlend();
     }
 }

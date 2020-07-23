@@ -18,6 +18,6 @@ public class SoundHelper {
 
         float playerPitch = .5f + 1.5f * new Random(playerKey.hashCode()).nextFloat();
 
-        minecraft.player.playSound(new SoundEvent(new ResourceLocation("block.note." + soundEventName)), 1, playerPitch);
+        minecraft.player.playSound(new SoundEvent(new ResourceLocation("block.note_block." + soundEventName)), 1, playerPitch);
     }
 }

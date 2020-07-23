@@ -1,16 +1,15 @@
 package com.aleksey.combatradar.gui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.widget.button.Button;
 
 import java.text.DecimalFormat;
-
-import static com.mumfrey.liteloader.gl.GL.glColor4f;
 
 /**
  * @author Aleksey Terzi
  */
-public class GuiSlider extends GuiButton {
+public class GuiSlider extends Button {
     private static DecimalFormat _decimalFormat = new DecimalFormat("#.##");
 
     private float _value;
@@ -22,8 +21,8 @@ public class GuiSlider extends GuiButton {
 
     public float getValue() { return _value; }
 
-    public GuiSlider(int id, int x, int y, int width, float maxValue, float minValue, String name, float value, boolean integer) {
-        super(id, x, y, width, 20, name);
+    public GuiSlider(int x, int y, int width, float maxValue, float minValue, String name, float value, boolean integer) {
+        super(x, y, width, 20, name + ": " + _decimalFormat.format(value), b -> {});
         _maxValue = maxValue;
         _minValue = minValue;
         _value = value;
@@ -32,45 +31,30 @@ public class GuiSlider extends GuiButton {
     }
 
     @Override
-    public int getHoverState(boolean hovered) {
-        return 0;
-    }
-
-    @Override
-    protected void mouseDragged(Minecraft minecraft, int mouseX, int mouseY) {
+    protected void onDrag(double p_onDrag_1_, double p_onDrag_3_, double p_onDrag_5_, double p_onDrag_7_) {
         if (!this.visible)
             return;
 
         if (_dragging)
-            calculateValue(mouseX);
+            calculateValue((int) p_onDrag_1_);
 
         update();
-
-        glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-        drawTexturedModalRect(this.x + (int) ((_value - _minValue) / (_maxValue - _minValue) * (this.width - 8)), this.y, 0, 66, 4, 20);
-        drawTexturedModalRect(this.x + (int) ((_value - _minValue) / (_maxValue - _minValue) * (this.width - 8)) + 4, this.y, 196, 66, 4, 20);
     }
 
     @Override
-    public boolean mousePressed(Minecraft minecraft, int mouseX, int mouseY) {
-        if (!super.mousePressed(minecraft, mouseX, mouseY))
-            return false;
-
-        calculateValue(mouseX);
+    public void onClick(double mouseX, double mouseY) {
+        calculateValue((int) mouseX);
 
         _dragging = true;
-
-        return true;
     }
 
     @Override
-    public void mouseReleased(int mouseX, int mouseY) {
+    public void onRelease(double mouseX, double mouseY) {
         _dragging = false;
     }
 
     private void update() {
-        this.displayString = _name + ": " + _decimalFormat.format(_value);
+        setMessage(_name + ": " + _decimalFormat.format(_value));
     }
 
     private void calculateValue(int mouseX) {
@@ -83,5 +67,23 @@ public class GuiSlider extends GuiButton {
             _value = _minValue;
         else if (_value > _maxValue)
             _value = _maxValue;
+    }
+
+    @Override
+    protected int getYImage(boolean p_getYImage_1_) {
+        return 0;
+    }
+
+    @Override
+    protected void renderBg(Minecraft p_renderBg_1_, int p_renderBg_2_, int p_renderBg_3_) {
+        p_renderBg_1_.getTextureManager().bindTexture(WIDGETS_LOCATION);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        int i = (this.isHovered() ? 2 : 1) * 20;
+        this.blit(this.x + (int)(normalizedValue() * (double)(this.width - 8)), this.y, 0, 46 + i, 4, 20);
+        this.blit(this.x + (int)(normalizedValue() * (double)(this.width - 8)) + 4, this.y, 196, 46 + i, 4, 20);
+    }
+
+    private double normalizedValue() {
+        return (_value - _minValue) / (_maxValue - _minValue);
     }
 }
