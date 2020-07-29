@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -25,6 +26,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Aleksey Terzi
@@ -150,7 +152,7 @@ public class CombatRadarForgeMod {
             return;
         }
 
-        long handle = minecraft.mainWindow.getHandle();
+        long handle = minecraft.getMainWindow().getHandle();
 
         if (minecraft.currentScreen == null && _config.getSettingsKey().isPressed()) {
             if(InputMappings.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_CONTROL) || InputMappings.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_CONTROL)) {
@@ -175,11 +177,10 @@ public class CombatRadarForgeMod {
 
         if(event.getMessage() != null) {
             String message = event.getMessage().getString();
-
             List<ITextComponent> siblings = event.getMessage().getSiblings();
-            TextFormatting color = siblings != null && siblings.size() > 1 ? siblings.get(1).getStyle().getColor() : null;
+            Color color = siblings != null && siblings.size() > 1 ? siblings.get(1).getStyle().func_240711_a_() : null;
 
-            if (color == TextFormatting.YELLOW) {
+            if (Objects.equals(color, Color.func_240744_a_(TextFormatting.YELLOW))) {
                 if (message.contains(" joined the game") || message.contains(" left the game")) {
                     event.setCanceled(true);
                 }

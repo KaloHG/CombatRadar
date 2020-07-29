@@ -29,7 +29,7 @@ public class GuiChooseSoundScreen extends Screen {
     }
 
     @Override
-    public void init() {
+    public void func_231160_c_() {
         _titleTop = this.height / 4 - 40;
 
         this.buttons.clear();

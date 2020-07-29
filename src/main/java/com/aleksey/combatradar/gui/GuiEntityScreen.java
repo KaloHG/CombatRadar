@@ -73,7 +73,7 @@ public class GuiEntityScreen extends Screen {
     }
 
     @Override
-    public void init() {
+    public void func_231160_c_() {
         _titleTop = this.height / 4 - 40;
         _buttonTop = this.height - this.height / 4 - 10;
         _iconTop = _titleTop + 16 + (this.height - (this.height - _buttonTop) - _titleTop - 16 - MAX_ENTITIES_PER_COL * LINE_HEIGHT) / 2;

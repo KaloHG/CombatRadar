@@ -20,6 +20,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.*;
+import net.minecraft.util.text.ITextProperties.ITextAcceptor;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.lwjgl.opengl.GL11;
@@ -39,9 +40,9 @@ public class Radar
 
         public PlayerInfo(AbstractClientPlayerEntity player) {
             this.playerName = player.getName().getString();
-            this.posX = player.posX;
-            this.posY = player.posY;
-            this.posZ = player.posZ;
+            this.posX = player.getPosX();
+            this.posY = player.getPosY();
+            this.posZ = player.getPosZ();
         }
     }
 
@@ -97,7 +98,7 @@ public class Radar
     }
 
     public void calcSettings(Minecraft minecraft) {
-        MainWindow res = minecraft.mainWindow;
+        MainWindow res = minecraft.getMainWindow();
         int radarDiameter = (int) ((res.getScaledHeight() - 2) * _config.getRadarSize());
 
         _radarRadius = radarDiameter / 2;
@@ -405,11 +406,11 @@ public class Radar
     }
 
     private void sendMessage(Minecraft minecraft, MessageInfo messageInfo) {
-        ITextComponent text = new StringTextComponent("[CombatRadar] ").setStyle(new Style().setColor(TextFormatting.DARK_AQUA));
-
+        ITextComponent text = new StringTextComponent("[CombatRadar] ").func_230530_a_(
+        		Style.field_240709_b_.func_240718_a_(Color.func_240744_a_(TextFormatting.DARK_AQUA)));
+        List<ITextComponent> siblings = text.getSiblings();
         TextFormatting playerColor;
         PlayerType playerType = _config.getPlayerType(messageInfo.playerName);
-
         switch(playerType) {
             case Ally:
                 playerColor = TextFormatting.GREEN;
@@ -421,8 +422,7 @@ public class Radar
                 playerColor = TextFormatting.WHITE;
                 break;
         }
-
-        text = text.appendSibling(new StringTextComponent(messageInfo.playerName).setStyle(new Style().setColor(playerColor)));
+        siblings.add(setColor(new StringTextComponent(messageInfo.playerName), playerColor));
 
         String actionText;
         TextFormatting actionColor;
@@ -448,7 +448,7 @@ public class Radar
                 return;
         }
 
-        text = text.appendSibling(new StringTextComponent(actionText).setStyle(new Style().setColor(actionColor)));
+        siblings.add(setColor(new StringTextComponent(actionText), actionColor));
 
         if(messageInfo.playerInfo != null) {
             ITextComponent coordText;
@@ -458,45 +458,38 @@ public class Radar
             } else if(_config.getIsVoxelMapEnabled()) {
                 coordText = getVoxelMapCoord(messageInfo.playerInfo);
             } else {
-                coordText = new StringTextComponent(getChatCoordText(messageInfo.playerInfo, false, true)).setStyle(new Style().setColor(actionColor));
+                coordText = new StringTextComponent(getChatCoordText(messageInfo.playerInfo, false, true)).func_230530_a_(Style.field_240709_b_.func_240712_a_(actionColor));
             }
 
-            text = text
-                    .appendSibling(new StringTextComponent(" at ").setStyle(new Style().setColor(actionColor)))
-                    .appendSibling(coordText);
+            siblings.add(setColor(new StringTextComponent(" at "), actionColor));
+            siblings.add(coordText);
         }
 
-        minecraft.player.sendMessage(text);
+        minecraft.player.sendMessage(text, null);
     }
 
     private static ITextComponent getJourneyMapCoord(PlayerInfo playerInfo) {
-        ITextComponent hover = new StringTextComponent("JourneyMap: ").setStyle(new Style().setColor(TextFormatting.YELLOW));
-        hover = hover.appendSibling(new StringTextComponent("Click to create Waypoint.\nCtrl+Click to view on map.").setStyle(new Style().setColor(TextFormatting.AQUA)));
+        ITextComponent hover = setColor(new StringTextComponent("JourneyMap: "), TextFormatting.YELLOW);
+        hover.getSiblings().add(setColor(new StringTextComponent("Click to create Waypoint.\nCtrl+Click to view on map."), TextFormatting.AQUA));
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover);
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.field_230550_a_, hover);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/jm wpedit " + getChatCoordText(playerInfo, true, true));
 
-        Style coordStyle = new Style()
-                .setClickEvent(clickEvent)
-                .setHoverEvent(hoverEvent)
-                .setColor(TextFormatting.AQUA);
+        Style coordStyle = Style.field_240709_b_.func_240715_a_(clickEvent).func_240716_a_(hoverEvent).func_240712_a_(TextFormatting.AQUA);
 
-        return new StringTextComponent(getChatCoordText(playerInfo, false, true)).setStyle(coordStyle);
+        return new StringTextComponent(getChatCoordText(playerInfo, false, true)).func_230530_a_(coordStyle);
     }
 
     private static ITextComponent getVoxelMapCoord(PlayerInfo playerInfo) {
-        ITextComponent hover = new StringTextComponent("Click to highlight coordinate,\nor control-click to add/edit waypoint.")
-                .setStyle(new Style().setColor(TextFormatting.WHITE));
+        ITextComponent hover = setColor(new StringTextComponent("Click to highlight coordinate,\nor control-click to add/edit waypoint."),
+                TextFormatting.WHITE);
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover);
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.field_230550_a_, hover);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/newWaypoint " + getChatCoordText(playerInfo, true, false));
 
-        Style coordStyle = new Style()
-                .setClickEvent(clickEvent)
-                .setHoverEvent(hoverEvent)
-                .setColor(TextFormatting.AQUA);
+        Style coordStyle = Style.field_240709_b_.func_240715_a_(clickEvent).func_240716_a_(hoverEvent).func_240712_a_(TextFormatting.AQUA);
 
-        return new StringTextComponent(getChatCoordText(playerInfo, false, true)).setStyle(coordStyle);
+        return new StringTextComponent(getChatCoordText(playerInfo, false, true)).func_230530_a_(coordStyle);
     }
 
     private static String getChatCoordText(PlayerInfo playerInfo, boolean includeName, boolean includeBrackets) {
@@ -523,5 +516,10 @@ public class Radar
         }
 
         return coordText.toString();
+    }
+    
+    private static IFormattableTextComponent setColor(StringTextComponent component, TextFormatting format) {
+    	return component.func_230530_a_(
+        		Style.field_240709_b_.func_240712_a_(format));
     }
 }

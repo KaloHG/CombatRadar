@@ -261,7 +261,7 @@ public class RadarConfig {
         _entities.add(new RadarEntityInfo(GuardianEntity.class, "Guardian", "icons/guardian.png", GroupType.Aggressive));
         _entities.add(new RadarEntityInfo(IronGolemEntity.class, "Iron Golem", "icons/iron_golem.png", GroupType.Neutral));
         _entities.add(new RadarEntityInfo(MagmaCubeEntity.class, "Magma Cube", "icons/slime/magmacube.png", GroupType.Aggressive));
-        _entities.add(new RadarEntityInfo(ZombiePigmanEntity.class, "Pig Zombie", "icons/zombie_pigman.png", GroupType.Neutral));
+        _entities.add(new RadarEntityInfo(ZombifiedPiglinEntity.class, "Zombified Piglin", "icons/zombie_pigman.png", GroupType.Neutral));
         _entities.add(new RadarEntityInfo(SilverfishEntity.class, "Silverfish", "icons/silverfish.png", GroupType.Aggressive));
         _entities.add(new RadarEntityInfo(SkeletonEntity.class, "Skeleton", "icons/skeleton/skeleton.png", GroupType.Aggressive));
         _entities.add(new RadarEntityInfo(SlimeEntity.class, "Slime", "icons/slime/slime.png", GroupType.Aggressive));

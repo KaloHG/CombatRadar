@@ -78,7 +78,7 @@ public class GuiManagePlayerScreen extends Screen {
     }
 
     @Override
-    public void init() {
+    public void func_231160_c_() {
         int x = this.width / 2 - 100;
         int y = this.height - 72;
 

@@ -3,6 +3,8 @@ package com.aleksey.combatradar.entities;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.ResourceHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
@@ -31,7 +33,7 @@ public class CustomRadarEntity extends RadarEntity {
         GlStateManager.rotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
         GlStateManager.scalef(iconScale, iconScale, iconScale);
 
-        AbstractGui.blit(-8, -8, 0, 0, 16, 16, 16, 16);
+        ResourceHelper.blit(-8, -8, 0, 0, 16, 16, 16, 16);
 
         GlStateManager.popMatrix();
         GlStateManager.disableBlend();

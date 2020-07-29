@@ -39,7 +39,7 @@ public class GuiPlayerSettingsScreen extends Screen {
     }
 
     @Override
-    public void init() {
+    public void func_231160_c_() {
         this.buttons.clear();
         this.children.clear();
 

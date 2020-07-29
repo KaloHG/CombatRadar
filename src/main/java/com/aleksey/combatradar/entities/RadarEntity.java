@@ -24,8 +24,8 @@ public abstract class RadarEntity {
     }
 
     public final void render(Minecraft minecraft) {
-        double displayX = minecraft.player.posX - _entity.posX;
-        double displayZ = minecraft.player.posZ - _entity.posZ;
+        double displayX = minecraft.player.getPosX() - _entity.getPosX();
+        double displayZ = minecraft.player.getPosZ() - _entity.getPosZ();
         double distanceSq = displayX * displayX + displayZ * displayZ;
 
         if(distanceSq > _settings.radarDistanceSq)

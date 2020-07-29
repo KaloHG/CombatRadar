@@ -38,7 +38,7 @@ public class LiveRadarEntity extends RadarEntity {
         GlStateManager.rotatef(minecraft.player.rotationYaw, 0.0F, 0.0F, 1.0F);
         GlStateManager.scalef(iconScale, iconScale, iconScale);
 
-        AbstractGui.blit(-8, -8, 0, 0, 16, 16, 16, 16);
+        ResourceHelper.blit(-8, -8, 0, 0, 16, 16, 16, 16);
 
         GlStateManager.popMatrix();
         GlStateManager.disableBlend();
@@ -52,7 +52,8 @@ public class LiveRadarEntity extends RadarEntity {
 
                 if (render instanceof HorseRenderer) {
                     HorseEntity horseEntity = (HorseEntity) getEntity();
-                    int horseVariant = (0xff & horseEntity.getHorseVariant()) % 7;
+                    //horse variant is private and remapping makes access via reflection undesireable
+                    int horseVariant = 0; //(0xff & horseEntity.func_234241_eS_()) % 7;
 
                     _resourceLocation = new ResourceLocation("combatradar", "icons/horse/horse_" + HORSE_VARIANTS[horseVariant] + ".png");
                 } else if (render instanceof LlamaRenderer) {

@@ -1,6 +1,8 @@
 package com.aleksey.combatradar.gui;
 
 import com.aleksey.combatradar.config.RadarConfig;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.StringTextComponent;
@@ -24,31 +26,31 @@ public class GuiMainScreen extends Screen {
     }
 
     @Override
-    public void init() {
-        this.buttons.clear();
-        this.children.clear();
+    public void func_231160_c_() {
+        this.field_230705_e_.clear();
+        this.field_230710_m_.clear();
 
-        int y = this.height / 4 - 16;
-        int x = this.width / 2 - 100;
+        int y = this.field_230709_l_ / 4 - 16;
+        int x = this.field_230708_k_ / 2 - 100;
 
-        addButton(new Button(x, y, 200, 20, "Location and Color", b -> minecraft.displayGuiScreen(new GuiLocationAndColorScreen(this, _config))));
+        func_230481_d_(new Button(x, y, 200, 20, new StringTextComponent("Location and Color"), b -> Minecraft.getInstance().displayGuiScreen(new GuiLocationAndColorScreen(this, _config))));
         y += 24;
-        addButton(new Button(x, y, 200, 20, "Radar Entities", b -> minecraft.displayGuiScreen(new GuiEntityScreen(this, _config))));
+        func_230481_d_(new Button(x, y, 200, 20, new StringTextComponent("Radar Entities"), b -> Minecraft.getInstance().displayGuiScreen(new GuiEntityScreen(this, _config))));
         y += 24;
-        addButton(new Button(x, y, 200, 20, "Manage Players", b -> minecraft.displayGuiScreen(new GuiManagePlayerScreen(this, _config))));
+        func_230481_d_(new Button(x, y, 200, 20, new StringTextComponent("Manage Players"), b -> Minecraft.getInstance().displayGuiScreen(new GuiManagePlayerScreen(this, _config))));
         y += 24;
-        addButton(new Button(x, y, 200, 20, "Player Settings", b -> minecraft.displayGuiScreen(new GuiPlayerSettingsScreen(this, _config))));
+        func_230481_d_(new Button(x, y, 200, 20, new StringTextComponent("Player Settings"), b -> Minecraft.getInstance().displayGuiScreen(new GuiPlayerSettingsScreen(this, _config))));
         y += 24;
-        addButton(_playerStatusButton = new Button(x, y, 200, 20, "Log Players Statuses:", b -> {
+        func_230481_d_(_playerStatusButton = new Button(x, y, 200, 20, new StringTextComponent("Log Players Statuses:"), b -> {
             _config.setLogPlayerStatus(!_config.getLogPlayerStatus());
             _config.save();
         }));
         y += 24;
-        addButton(_enableButton = new Button(x, y, 100, 20, "Radar: ", b -> {
+        func_230481_d_(_enableButton = new Button(x, y, 100, 20, new StringTextComponent("Radar: "), b -> {
             _config.setEnabled(!_config.getEnabled());
             _config.save();
         }));
-        addButton(new Button(x + 101, y, 100, 20, "Done", b -> minecraft.displayGuiScreen(_parent)));
+        func_230481_d_(new Button(x + 101, y, 100, 20, new StringTextComponent("Done"), b -> Minecraft.getInstance().displayGuiScreen(_parent)));
     }
 
     @Override
