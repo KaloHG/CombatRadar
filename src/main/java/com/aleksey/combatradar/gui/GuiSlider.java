@@ -1,8 +1,10 @@
 package com.aleksey.combatradar.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.text.DecimalFormat;
 
@@ -22,7 +24,7 @@ public class GuiSlider extends Button {
     public float getValue() { return _value; }
 
     public GuiSlider(int x, int y, int width, float maxValue, float minValue, String name, float value, boolean integer) {
-        super(x, y, width, 20, name + ": " + _decimalFormat.format(value), b -> {});
+        super(x, y, width, 20, new StringTextComponent(name + ": " + _decimalFormat.format(value)), b -> {});
         _maxValue = maxValue;
         _minValue = minValue;
         _value = value;
@@ -31,34 +33,35 @@ public class GuiSlider extends Button {
     }
 
     @Override
-    protected void onDrag(double p_onDrag_1_, double p_onDrag_3_, double p_onDrag_5_, double p_onDrag_7_) {
-        if (!this.visible)
+    protected void func_230983_a_(double p_onDrag_1_, double p_onDrag_3_, double p_onDrag_5_, double p_onDrag_7_) { //onDrag
+        if (!this.field_230694_p_) { //isVisible check
             return;
+        }
 
-        if (_dragging)
+        if (_dragging) {
             calculateValue((int) p_onDrag_1_);
-
+        }
         update();
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void func_230982_a_(double mouseX, double mouseY) {  //onClick
         calculateValue((int) mouseX);
 
         _dragging = true;
     }
-
+    
     @Override
-    public void onRelease(double mouseX, double mouseY) {
+    public void func_231000_a__(double mouseX, double mouseY) { //onRelease
         _dragging = false;
     }
 
     private void update() {
-        setMessage(_name + ": " + _decimalFormat.format(_value));
+    	func_238482_a_(new StringTextComponent(_name + ": " + _decimalFormat.format(_value)));
     }
 
     private void calculateValue(int mouseX) {
-        _value = ((float) (mouseX - 4 - this.x)) * (_maxValue - _minValue) / (width - 8) + _minValue;
+        _value = ((float) (mouseX - 4 - this.field_230690_l_)) * (_maxValue - _minValue) / (this.field_230690_l_ - 8) + _minValue;
 
         if(_integer)
             _value = Math.round(_value);
@@ -70,17 +73,19 @@ public class GuiSlider extends Button {
     }
 
     @Override
-    protected int getYImage(boolean p_getYImage_1_) {
+    protected int func_230989_a_(boolean p_getYImage_1_) { //getYImage
         return 0;
     }
 
     @Override
-    protected void renderBg(Minecraft p_renderBg_1_, int p_renderBg_2_, int p_renderBg_3_) {
-        p_renderBg_1_.getTextureManager().bindTexture(WIDGETS_LOCATION);
+    protected void func_230441_a_(MatrixStack matrix, Minecraft p_renderBg_1_, int p_renderBg_2_, int p_renderBg_3_) { //renderBg
+        p_renderBg_1_.getTextureManager().bindTexture(field_230687_i_);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        int i = (this.isHovered() ? 2 : 1) * 20;
-        this.blit(this.x + (int)(normalizedValue() * (double)(this.width - 8)), this.y, 0, 46 + i, 4, 20);
-        this.blit(this.x + (int)(normalizedValue() * (double)(this.width - 8)) + 4, this.y, 196, 46 + i, 4, 20);
+        int i = (this.field_230692_n_ ? 2 : 1) * 20; //if isHovered
+        //blit
+        func_238474_b_(new MatrixStack(),this.field_230690_l_ + (int)(normalizedValue() * (double)(this.field_230690_l_ - 8)), this.field_230691_m_, 0, 46 + i, 4, 20);
+      //blit
+        func_238474_b_(new MatrixStack(),this.field_230690_l_ + (int)(normalizedValue() * (double)(this.field_230690_l_ - 8)) + 4, this.field_230691_m_, 196, 46 + i, 4, 20);
     }
 
     private double normalizedValue() {

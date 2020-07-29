@@ -1,10 +1,12 @@
 package com.aleksey.combatradar.gui;
 
 import com.aleksey.combatradar.config.RadarConfig;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
@@ -54,24 +56,24 @@ public class GuiMainScreen extends Screen {
     }
 
     @Override
-    public void tick() {
-        _playerStatusButton.setMessage("Log Players Statuses: " + (_config.getLogPlayerStatus() ? "On" : "Off"));
-        _enableButton.setMessage("Radar: " + (_config.getEnabled() ? "On" : "Off"));
+    public void func_231023_e_() {  //tick
+        _playerStatusButton.func_238482_a_(new StringTextComponent("Log Players Statuses: " + (_config.getLogPlayerStatus() ? "On" : "Off")));
+        _enableButton.func_238482_a_(new StringTextComponent("Radar: " + (_config.getEnabled() ? "On" : "Off")));
     }
 
     @Override
-    public void onClose() {
-        minecraft.displayGuiScreen(_parent);
+    public void func_231175_as__() {  //onClose
+        Minecraft.getInstance().displayGuiScreen(_parent);
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        String keyName = _config.getSettingsKey().getLocalizedName();
+    public void func_230430_a_(MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {  //render
+        ITextComponent keyName = _config.getSettingsKey().func_238171_j_();
 
-        renderBackground();
-        drawCenteredString(this.font, "Combat Radar Settings", this.width / 2, this.height / 4 - 40, Color.WHITE.getRGB());
-        drawCenteredString(font, "Ctrl+Alt+" + keyName + " - enable/disable radar", this.width / 2, _enableButton.y + 24, Color.LIGHT_GRAY.getRGB());
-        drawCenteredString(font, "Ctrl+" + keyName + " - enable/disable mobs", this.width / 2, _enableButton.y + 24 + 12, Color.LIGHT_GRAY.getRGB());
-        super.render(mouseX, mouseY, partialTicks);
+        func_230446_a_(new MatrixStack()); //renderBackground()
+        func_238471_a_(new MatrixStack(), this.field_230712_o_,"Combat Radar Settings", this.field_230708_k_ / 2, this.field_230709_l_ / 4 - 40, Color.WHITE.getRGB());
+        func_238471_a_(new MatrixStack(), this.field_230712_o_,"Ctrl+Alt+" + keyName.getUnformattedComponentText() + " - enable/disable radar", this.field_230708_k_ / 2, _enableButton.field_230691_m_ + 24, Color.LIGHT_GRAY.getRGB());
+        func_238471_a_(new MatrixStack(), this.field_230712_o_,"Ctrl+" + keyName.getUnformattedComponentText() + " - enable/disable mobs", this.field_230708_k_ / 2, _enableButton.field_230691_m_ + 24 + 12, Color.LIGHT_GRAY.getRGB());
+        super.func_230430_a_(matrix, mouseX, mouseY, partialTicks);
     }
 }

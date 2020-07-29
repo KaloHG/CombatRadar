@@ -3,10 +3,14 @@ package com.aleksey.combatradar.gui;
 import com.aleksey.combatradar.config.GroupType;
 import com.aleksey.combatradar.config.RadarConfig;
 import com.aleksey.combatradar.config.RadarEntityInfo;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.renderer.entity.ResourceHelper;
 import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
@@ -43,8 +47,8 @@ public class GuiEntityScreen extends Screen {
 
         public EntityGroup(GroupType groupType) {
             this.groupType = groupType;
-            this.entities = new ArrayList<RadarEntityInfo>();
-            this.listColTextWidth = new ArrayList<Integer>();
+            this.entities = new ArrayList<>();
+            this.listColTextWidth = new ArrayList<>();
         }
     }
 
@@ -74,16 +78,16 @@ public class GuiEntityScreen extends Screen {
 
     @Override
     public void func_231160_c_() {
-        _titleTop = this.height / 4 - 40;
-        _buttonTop = this.height - this.height / 4 - 10;
-        _iconTop = _titleTop + 16 + (this.height - (this.height - _buttonTop) - _titleTop - 16 - MAX_ENTITIES_PER_COL * LINE_HEIGHT) / 2;
+        _titleTop = this.field_230709_l_ / 4 - 40;
+        _buttonTop = this.field_230709_l_ - this.field_230709_l_ / 4 - 10;
+        _iconTop = _titleTop + 16 + (this.field_230709_l_ - (this.field_230709_l_ - _buttonTop) - _titleTop - 16 - MAX_ENTITIES_PER_COL * LINE_HEIGHT) / 2;
 
         createEntityGroups();
         showGroup(_activeGroupType);
     }
 
     private void createEntityGroups() {
-        _groups = new HashMap<GroupType, EntityGroup>();
+        _groups = new HashMap<>();
 
         for(RadarEntityInfo info : _config.getEntities()) {
             EntityGroup group = _groups.get(info.getGroupType());
@@ -92,7 +96,7 @@ public class GuiEntityScreen extends Screen {
                 _groups.put(info.getGroupType(), group = new EntityGroup(info.getGroupType()));
 
             int colIndex = group.entities.size() / MAX_ENTITIES_PER_COL;
-            int textWidth = this.font.getStringWidth(info.getName());
+            int textWidth = this.field_230712_o_.getStringWidth(info.getName());
 
             if(group.listColTextWidth.size() <= colIndex)
                 group.listColTextWidth.add(textWidth);
@@ -106,43 +110,43 @@ public class GuiEntityScreen extends Screen {
     private void showGroup(GroupType groupType) {
         _activeGroupType = groupType;
         _activeGroup = _groups.get(groupType);
-        _iconLeft = (this.width - _activeGroup.getTotalWidth() + 25) / 2;
+        _iconLeft = (this.field_230708_k_ - _activeGroup.getTotalWidth() + 25) / 2;
 
-        this.buttons.clear();
-        this.children.clear();
+        this.field_230705_e_.clear();
+        this.field_230710_m_.clear();
 
         int y = _buttonTop;
-        int x = this.width / 2 - 100;
+        int x = this.field_230708_k_ / 2 - 100;
 
         Button neutralButton, aggressiveButton, otherButton;
 
-        addButton(neutralButton = new Button(x, y, 66, 20, "Neutral", b -> showGroup(GroupType.Neutral)));
-        addButton(aggressiveButton = new Button(x + 66 + 1, y, 66, 20, "Agressive", b -> showGroup(GroupType.Aggressive)));
-        addButton(otherButton = new Button(x + 66 + 1 + 66 + 1, y, 66, 20, "Other", b -> showGroup(GroupType.Other)));
+        func_230481_d_(neutralButton = new Button(x, y, 66, 20, new StringTextComponent("Neutral"), b -> showGroup(GroupType.Neutral)));
+        func_230481_d_(aggressiveButton = new Button(x + 66 + 1, y, 66, 20, new StringTextComponent("Agressive"), b -> showGroup(GroupType.Aggressive)));
+        func_230481_d_(otherButton = new Button(x + 66 + 1 + 66 + 1, y, 66, 20, new StringTextComponent("Other"), b -> showGroup(GroupType.Other)));
 
         switch(groupType) {
             case Neutral:
-                neutralButton.active = false;
+                neutralButton.field_230693_o_ = false; //set active to false
                 _groupName = "Neutral";
                 break;
             case Aggressive:
-                aggressiveButton.active = false;
+                aggressiveButton.field_230693_o_ = false;
                 _groupName = "Aggressive";
                 break;
             case Other:
-                otherButton.active = false;
+                otherButton.field_230693_o_ = false;
                 _groupName = "Other";
                 break;
         }
 
         y += 24;
-        addButton(_enableButton = new Button(x, y, 200, 20, getEnableButtonText(), b -> {
+        func_230481_d_(_enableButton = new Button(x, y, 200, 20, new StringTextComponent(getEnableButtonText()), b -> {
             _config.setGroupEnabled(_activeGroupType, !_config.isGroupEnabled(_activeGroupType));
             _config.save();
-            _enableButton.setMessage(getEnableButtonText());
+            _enableButton.func_238482_a_(new StringTextComponent(getEnableButtonText()));
         }));
         y += 24;
-        addButton(new Button(x, y, 200, 20, "Done", b -> minecraft.displayGuiScreen(_parent)));
+        func_230481_d_(new Button(x, y, 200, 20, new StringTextComponent("Done"), b -> Minecraft.getInstance().displayGuiScreen(_parent)));
 
         addIconButtons();
     }
@@ -173,10 +177,10 @@ public class GuiEntityScreen extends Screen {
             String buttonText = info.getEnabled() ? "on": "off";
             final RadarEntityInfo infoFinal = info;
 
-            addButton(new Button(buttonX, buttonY, BUTTON_WIDTH, buttonHeight, buttonText, b -> {
+            func_230481_d_(new Button(buttonX, buttonY, BUTTON_WIDTH, buttonHeight, new StringTextComponent(buttonText), b -> {
                 infoFinal.setEnabled(!infoFinal.getEnabled());
                 _config.save();
-                b.setMessage(info.getEnabled() ? "on": "off");
+                b.func_238482_a_(new StringTextComponent(info.getEnabled() ? "on": "off"));
             }));
 
             buttonY += LINE_HEIGHT;
@@ -186,17 +190,17 @@ public class GuiEntityScreen extends Screen {
     }
 
     @Override
-    public void onClose() {
+    public void func_231175_as__() { //onClose
         _config.save();
-        minecraft.displayGuiScreen(_parent);
+        Minecraft.getInstance().displayGuiScreen(_parent);
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        renderDirtBackground(0);
-        drawCenteredString(this.font, "Radar Entities", this.width / 2, _titleTop, Color.WHITE.getRGB());
+    public void func_230430_a_(MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {  //render
+    	func_231165_f_(0); //draw dirt background
+    	func_238471_a_(new MatrixStack(), this.field_230712_o_, "Radar Entities", this.field_230708_k_ / 2, _titleTop, Color.WHITE.getRGB());
         renderIcons();
-        super.render(mouseX, mouseY, partialTicks);
+        super.func_230430_a_(matrix, mouseX, mouseY, partialTicks);
     }
 
     private void renderIcons() {
@@ -217,7 +221,7 @@ public class GuiEntityScreen extends Screen {
             renderIcon(x, y + 4, info);
 
             Color color = info.getEnabled() ? Color.WHITE : Color.DARK_GRAY;
-            this.font.drawStringWithShadow(info.getName(), x + ICON_WIDTH, y, color.getRGB());
+            this.field_230712_o_.func_238405_a_(new MatrixStack(), info.getName(), x + ICON_WIDTH, y, color.getRGB());
 
             y += LINE_HEIGHT;
 
@@ -231,9 +235,9 @@ public class GuiEntityScreen extends Screen {
         GlStateManager.scalef(0.6f, 0.6f, 0.6f);
         GlStateManager.color4f(1f, 1f, 1f, 1f);
 
-        minecraft.getTextureManager().bindTexture(info.getIcon());
+        Minecraft.getInstance().getTextureManager().bindTexture(info.getIcon());
 
-        AbstractGui.blit(-8, -8, 0, 0, 16, 16, 16, 16);
+        ResourceHelper.blit(-8, -8, 0, 0, 16, 16, 16, 16);
 
         GlStateManager.popMatrix();
     }

@@ -86,7 +86,7 @@ public class GuiAddPlayerScreen extends Screen {
         func_231165_f_(0); //draw dirt background
         func_238471_a_(new MatrixStack(), this.field_230712_o_, "Add " + playerTypeName + " Player", this.field_230708_k_ / 2, this.field_230709_l_ / 4 - 40, Color.WHITE.getRGB());
 
-        field_230712_o_.drawStringWithShadow("Player username", this.field_230708_k_ / 2 - 100, _playerNameTextField.field_230691_m_ - 12, Color.LIGHT_GRAY.getRGB());
+        field_230712_o_.func_238405_a_(new MatrixStack(), "Player username", this.field_230708_k_ / 2 - 100, _playerNameTextField.field_230691_m_ - 12, Color.LIGHT_GRAY.getRGB());
 
         super.func_230430_a_(matrix, mouseX, mouseY, partialTicks);
     }

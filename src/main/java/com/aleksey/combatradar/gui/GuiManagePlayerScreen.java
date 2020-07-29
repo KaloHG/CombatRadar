@@ -2,9 +2,13 @@ package com.aleksey.combatradar.gui;
 
 import com.aleksey.combatradar.config.PlayerType;
 import com.aleksey.combatradar.config.RadarConfig;
-import net.minecraft.client.gui.SlotGui;
+import com.mojang.blaze3d.matrix.MatrixStack;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.ExtendedList;
+import net.minecraft.client.gui.widget.list.ExtendedList.AbstractListEntry;
 import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
@@ -16,19 +20,38 @@ import java.util.List;
 public class GuiManagePlayerScreen extends Screen {
     private static final int SLOT_HEIGHT = 16;
 
-    private class PlayerListContainer extends SlotGui {
+    private class PlayerListContainerEntry extends AbstractListEntry<PlayerListContainerEntry>{
+    	
+    	private String playerName;
+    	
+    	public PlayerListContainerEntry(String playerName) {
+			this.playerName = playerName;
+		}
+
+		@Override
+		public void func_230432_a_(MatrixStack p_230432_1_, int entryId, int par2, int par3,
+				int p_230432_5_, int p_230432_6_, int p_230432_7_, int p_230432_8_, boolean p_230432_9_,
+				float p_230432_10_) {
+			String playerName = GuiManagePlayerScreen.this._players.get(entryId);
+            GuiManagePlayerScreen.this.drawString(Minecraft.getInstance().fontRenderer, playerName, par2 + 1, par3 + 1, Color.WHITE.getRGB());
+			
+		}
+    	
+    }
+    
+    private class PlayerListContainer extends ExtendedList<PlayerListContainerEntry> {
         public PlayerListContainer() {
-            super(GuiManagePlayerScreen.this.minecraft, GuiManagePlayerScreen.this.width, GuiManagePlayerScreen.this.height, 32, GuiManagePlayerScreen.this.height - 73, SLOT_HEIGHT);
+            super(Minecraft.getInstance(), GuiManagePlayerScreen.this.width, GuiManagePlayerScreen.this.height, 32, GuiManagePlayerScreen.this.height - 73, SLOT_HEIGHT);
         }
 
         @Override
-        protected int getItemCount() {
+        protected int func_230965_k_() { //getItemCount
             return GuiManagePlayerScreen.this._players.size();
         }
 
         @Override
-        protected boolean selectItem(int slotIndex, int type, double mouseX, double mouseY) {
-            GuiManagePlayerScreen.this._playerIndex = slotIndex;
+        protected boolean func_241215_a_(PlayerListContainerEntry entry) { //setSelected
+            GuiManagePlayerScreen.this._playerIndex = entry.;
 
             boolean isValidSlot = slotIndex >= 0 && slotIndex < getItemCount();
 
@@ -38,24 +61,13 @@ public class GuiManagePlayerScreen extends Screen {
         }
 
         @Override
-        protected boolean isSelectedItem(int slotIndex) {
+        protected boolean func_230957_f_(int slotIndex) { //isSelectedItem
             return slotIndex == GuiManagePlayerScreen.this._playerIndex;
         }
 
         @Override
-        protected int getMaxPosition() {
-            return getItemCount() * SLOT_HEIGHT;
-        }
-
-        @Override
-        protected void renderBackground() {
-            GuiManagePlayerScreen.this.renderDirtBackground(0);
-        }
-
-        @Override
-        protected void renderItem(int entryId, int par2, int par3, int par4, int par5, int par6, float par7) {
-            String playerName = GuiManagePlayerScreen.this._players.get(entryId);
-            GuiManagePlayerScreen.this.drawString(minecraft.fontRenderer, playerName, par2 + 1, par3 + 1, Color.WHITE.getRGB());
+        protected void func_230433_a_(MatrixStack matrix) {
+            GuiManagePlayerScreen.this.func_231165_f_(0); //draw dirt background
         }
     }
 
@@ -78,12 +90,12 @@ public class GuiManagePlayerScreen extends Screen {
     }
 
     @Override
-    public void func_231160_c_() {
+    public void func_231160_c_() { //init
         int x = this.width / 2 - 100;
         int y = this.height - 72;
 
-        this.buttons.clear();
-        this.children.clear();
+        this.field_230705_e_.clear();
+        this.field_230710_m_.clear();
         addButton(_allyButton = new Button(x, y, 100, 20, "Allies", b -> showPlayers(PlayerType.Ally)));
         addButton(_enemyButton = new Button(x + 101, y, 100, 20, "Enemies", b -> showPlayers(PlayerType.Enemy)));
         y += 24;
@@ -114,16 +126,15 @@ public class GuiManagePlayerScreen extends Screen {
     }
 
     @Override
-    public void onClose() {
-        minecraft.displayGuiScreen(_parent);
+    public void func_231175_as__() { //onClose
+        Minecraft.getInstance().displayGuiScreen(_parent);
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks)
-    {
-        renderDirtBackground(0);
-        _playerListContainer.render(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.font, "Manage Players", this.width / 2, 20, Color.WHITE.getRGB());
-        super.render(mouseX, mouseY, partialTicks);
+    public void func_230430_a_(MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {  //render
+    	func_230446_a_(new MatrixStack()); //renderBackground()
+        _playerListContainer.func_230430_a_(matrix, mouseX, mouseY, partialTicks);
+        func_238471_a_(new MatrixStack(), this.field_230712_o_,"Manage Players", this.width / 2, 20, Color.WHITE.getRGB());
+        super.func_230430_a_(matrix, mouseX, mouseY, partialTicks);
     }
 }
