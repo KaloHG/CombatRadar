@@ -63,6 +63,8 @@ public class LiveRadarEntity extends RadarEntity {
                     _resourceLocation = new ResourceLocation("combatradar", "icons/shulker/shulker.png");
                 } else if (render instanceof GhastRenderer) {
                     _resourceLocation = new ResourceLocation("combatradar", "icons/ghast/ghast.png");
+                } else if (render instanceof MooshroomRenderer) {
+                    _resourceLocation = new ResourceLocation("combatradar", "icons/cow/mooshroom.png");
                 } else {
                     ResourceLocation original = ResourceHelper.getEntityTexture(render, getEntity());
                     _resourceLocation = new ResourceLocation("combatradar", original.getPath().replace("textures/entity/", "icons/"));
